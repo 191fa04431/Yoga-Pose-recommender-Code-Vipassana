@@ -1,0 +1,126 @@
+<!-- Copyright 2022 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+-->
+
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Show Pose</title>
+    <meta charset="UTF-8">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <style type="text/css">
+        .editForm, .deleteForm {
+            display: none;
+        }
+    </style>
+    <script>
+        function callEdit(){
+            document.getElementById("editForm").style.display = "block";
+            document.getElementById("deleteForm").style.display = "none";
+        }
+        function callDelete(){
+            document.getElementById("deleteForm").style.display = "block";
+            document.getElementById("editForm").style.display = "none";
+        }
+
+        function validateEdit(){
+            var breath = document.getElementById("breath").value;
+            var posture = document.getElementById("posture").value;
+            if(/[^a-zA-Z0-9 ]/.test(breath) ) {
+                alert('Breath is not valid');
+                return false;
+            }
+            return true;
+        }
+
+        function callGemini(){
+            if (!validateEdit()) return;
+
+            document.getElementById("nameHdn").value = document.getElementById("name").value; // Ensure hidden name field is populated
+            document.getElementById("breathHdn").value = document.getElementById("breath").value; // Ensure hidden breath field is populated. Important for /callgemini route!
+            document.gForm.submit();
+        }
+
+
+        function clearAll(){
+            document.getElementById("breath").value = "";
+            document.getElementById("posture").value = "";
+        }
+    </script>
+</head>
+<body>
+<div class="container mt-5">
+    <h1>Yoga Pose</h1>
+
+    <p th:text="'Name: ' + ${pose.name}"></p>
+    <p th:text="'Breath: ' + ${pose.breath}"></p>
+    <p th:text="'Posture: ' + ${pose.posture}"></p>
+
+    <div th:if="${pose.poseList != null and !pose.poseList.isEmpty() and pose.urltitleList != null and !pose.urltitleList.isEmpty()}">
+        <p>Source:</p>
+        <ul>
+            <li th:each="poseUrl, iterStat : ${pose.poseList}">
+                <a th:href="${poseUrl}" th:text="${pose.urltitleList[iterStat.index]}"></a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="mt-3">
+        <a href="/home" class="btn btn-secondary">Home</a>
+        <button onClick="callEdit();" class="btn btn-primary">Edit</button>
+        <button onClick="callDelete();" class="btn btn-danger">Delete</button>
+    </div>
+</div>
+
+
+
+<div id="editForm" class="editForm container mt-5">
+    <h2>Edit</h2>
+    <form id="eForm" name="eForm" action="#" th:action="@{/editpose}" th:object="${pose}" method="post" onsubmit="return validateEdit();">
+        <input type="hidden" th:field="*{name}">
+
+        <div class="mb-3">
+            <label for="breath" class="form-label">Breath:</label>
+            <input type="text" class="form-control" id="breath" th:field="*{breath}">
+        </div>
+        <div class="mb-3">
+            <label for="posture" class="form-label">Posture:</label>
+            <textarea class="form-control" id="posture" th:field="*{posture}" style="height: 250px;"></textarea>
+        </div>
+
+        <div class="mb-3">
+          <button type="submit" class="btn btn-primary">Submit Edit</button>
+          <button type="button" class="btn btn-secondary" onClick="clearAll();">Reset</button>
+        </div>
+    </form>
+
+    <form id="gForm" name="gForm" action="#" th:action="@{/callgemini}" th:object="${pose}" method="post" class="mt-3">
+        <input type="hidden" id="nameHdn" th:field="*{name}">
+        <input type="hidden" id="breathHdn" th:field="*{breath}">
+        <button type="button" class="btn btn-success btn-block" onClick="callGemini();">Generate Description</button>
+    </form>
+</div>
+
+<div id="deleteForm" class="deleteForm container mt-5">
+    <h2>Delete</h2>
+    <form id="dForm" name="dForm" action="#" th:action="@{/deletepose}" th:object="${pose}" method="post">
+        <input type="hidden" th:field="*{name}">
+        <p>
+            <input type="submit" value="Confirm" class="btn btn-danger"/>
+        </p>
+    </form>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,98 @@
+<!-- Copyright 2022 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+-->
+
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Add Pose</title>
+    <meta charset="UTF-8">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <script>
+        function validate(){
+            var name = document.getElementById("name").value;
+            var breath = document.getElementById("breath").value;
+            var posture = document.getElementById("posture").value;
+            if(/[^a-zA-Z0-9]/.test(name) ) {
+                alert('Name is not valid');
+                return false; // Prevent form submission
+            }
+            if(/[^a-zA-Z0-9 ]/.test(breath) ) {
+                alert('Breath is not valid');
+                return false; // Prevent form submission
+            }
+           return true; // Allow form submission if validation passes
+        }
+
+        function clearAll(){
+            document.getElementById("name").value = "";
+            document.getElementById("breath").value = "";
+            document.getElementById("posture").value = "";
+        }
+
+        function callGemini(){
+           if (!validate()) return; // Call validation function and stop if it fails
+
+            document.getElementById("nameHdn").value = document.getElementById("name").value;
+            document.getElementById("breathHdn").value = document.getElementById("breath").value;
+            document.gForm.submit();
+        }
+    </script>
+</head>
+<body>
+<a href="/home">Home</a>
+<div class="container mt-5">
+    <h1>Add Pose</h1>
+
+    <form id="cForm" name="cForm" action="#" th:action="@{/editpose}" th:object="${pose}" method="post" onsubmit="return validate();">
+        <div class="mb-3">
+            <label for="name" class="form-label">Name:</label>
+            <input type="text" class="form-control" id="name" th:field="*{name}" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="breath" class="form-label">Breath:</label>
+            <input type="text" class="form-control" id="breath" th:field="*{breath}" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="posture" class="form-label">Posture:</label>
+            <textarea class="form-control" id="posture" th:field="*{posture}" style="height: 250px;" required></textarea>
+        </div>
+        <div class="d-grid gap-2 d-md-flex justify-content-center">
+            <button type="submit" class="btn btn-primary me-md-2">Submit</button> 
+            <button type="button" class="btn btn-secondary" onClick="clearAll();">Reset</button>
+        </div>
+    </form>
+
+    <form id="gForm" name="gForm" action="#" th:action="@{/callgeminicreate}" th:object="${pose}" method="post" class="mt-3">
+        <input type="hidden" id="nameHdn" th:field="*{name}">
+        <input type="hidden" id="breathHdn" th:field="*{breath}">
+        <div class="d-grid gap-2">
+            <button type="button" class="btn btn-success btn-block" onClick="callGemini();">Generate Description</button>
+        </div>      
+    </form>
+
+    <div th:if="${pose.poseList != null and !pose.poseList.isEmpty() and pose.urltitleList != null and !pose.urltitleList.isEmpty()}">
+        <p class="mt-3">Source:</p>
+        <ul>
+            <li th:each="poseUrl, iterStat : ${pose.poseList}">
+                <a th:href="${poseUrl}" th:text="${pose.urltitleList[iterStat.index]}"></a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+</body>
+</html>

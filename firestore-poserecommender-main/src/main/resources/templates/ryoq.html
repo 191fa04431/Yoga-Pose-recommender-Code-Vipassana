@@ -1,0 +1,74 @@
+<!-- Copyright 2022 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+-->
+
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Query</title>
+    <meta charset="UTF-8">
+    <script>
+        function clearAll(){
+            document.getElementById("ryoq").value = "";
+            document.getElementById("containsresponse").value = "";
+            document.getElementById("response").style.display = "none";
+        }
+        function validate(){
+            var query = document.getElementById("ryoq").value;
+            
+            if(query == ""){
+                alert("Query is invalid");
+            }
+            else{
+                document.sForm.submit();
+            }
+        }
+
+        function callDivEnable(){
+            var response = document.getElementById("containsresponse").value;
+            if(response == "" || response == null){
+                document.getElementById("response").style.display = "none";
+            }else{
+                document.getElementById("response").style.display = "block";
+                document.getElementById("containsresponse").value="";
+            }
+        }
+    </script>
+</head>
+<body onLoad="callDivEnable();">
+<a href="/home">Home</a>
+<div align="center">
+<h1>Run Your Own Query</h1>
+
+<form id="sForm" name="sForm" action="#" th:action="@{/run}" th:object="${pose}" method="post">
+    <p>
+        Query: <input id="ryoq" type="text" th:field="*{query}">
+    </p>
+    <p>
+        <input type="hidden" id="containsresponse" th:field="*{response}">
+    </p> 
+    <p>
+        <input type="button" value="Submit" style="background-color:red; color:white" onClick="validate();"/> 
+        <input type="button" value="Reset" style="background-color:blue; color:white" onClick="clearAll();">
+    </p>
+</form>
+</div>
+
+<div id="response" align="center">
+<h1>Query Response</h1>
+<p th:text="'Response: ' + ${pose.response}"></p>
+</div>
+
+</body>
+</html>

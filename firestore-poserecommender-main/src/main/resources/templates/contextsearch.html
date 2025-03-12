@@ -1,0 +1,83 @@
+<!-- Copyright 2022 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+-->
+
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+
+    <title>Pose</title>
+    <meta charset="UTF-8">
+    <script>
+        function clearAll(){
+            document.getElementById("name").value = "";
+        }
+        function validate(){
+            var name = document.getElementById("name").value;
+            
+            if(name==""){
+                alert("Pose name is invalid");
+            }
+            else if( /[^"[^a-zA-Z0-9 ,.;-_+!#$&()*?@\\s]]/.test( name ) ) {
+                alert('Pose name is invalid');
+            }
+            else{
+               // alert(name);
+                document.sForm.submit();
+            }
+        }
+
+    </script>
+</head>
+<body>
+<a href="/home">Home</a>
+<div class="container">
+    <h1 class="mt-4">Search Pose by Context</h1> <!-- Added margin top -->
+
+    <form id="sForm" name="sForm" action="#" th:action="@{/matchpose}" th:object="${pose}" method="get" class="needs-validation"> 
+        <div class="mb-3"> <!-- Added margin bottom -->
+            
+            <textarea id="name" th:field="*{posture}" class="form-control" style="height: 250px; width: 100%;"></textarea>
+        </div>
+
+        <button type="button" class="btn btn-primary" onClick="validate();">Submit</button>
+        <button type="button" class="btn btn-secondary" onClick="clearAll();">Reset</button>
+
+        <div th:if="${pose.posesList != null and !pose.posesList.isEmpty()}">
+            <h2 class="mt-4">Poses</h2>
+            <div class="row">
+                <div class="col-md-4" th:each="p : ${pose.posesList}">
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title" th:text="${p.name}"></h5>
+                            <p class="card-text" th:text="'Breath: ' + ${p.breath}"></p>
+                            <p class="card-text" th:text="'Posture: ' + ${p.posture}"></p>
+                            <img th:if="${p.base64 != null}" th:src="${p.base64}" class="card-img-top" alt="Pose Image">
+                            <audio th:if="${p.base64Audio != null}" controls>
+                                <source th:src="${p.base64Audio}" type="audio/mp3">
+                                Your browser does not support the audio element.
+                            </audio>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+</body>
+</html>
